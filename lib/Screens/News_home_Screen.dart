@@ -4,17 +4,64 @@ import '../components/category_widget.dart';
 import 'NewsListBuilder.dart';
 import 'Search_screen.dart';
 
-class NewsHomeScreen extends StatelessWidget {
-  const NewsHomeScreen({super.key});
+class NewsHomeScreen extends StatefulWidget {
+  NewsHomeScreen({super.key});
+
+  @override
+  State<NewsHomeScreen> createState() => _NewsHomeScreenState();
+}
+
+class _NewsHomeScreenState extends State<NewsHomeScreen> {
+  ScrollController controller = ScrollController();
+  bool _showFAB = false;
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(() {
+      if (controller.position.atEdge) {
+        if (controller.position.pixels == 0) {
+          // You are at the top of the scroll
+          if (_showFAB) {
+            setState(() {
+              _showFAB = false;
+            });
+          }
+        } else {
+          // You are at the bottom of the scroll
+          if (!_showFAB) {
+            setState(() {
+              _showFAB = true;
+            });
+          }
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 6,
       child: Scaffold(
+        floatingActionButton: _showFAB
+            ? FloatingActionButton(
+                onPressed: () {
+                  controller.animateTo(0,
+                      duration: Duration(seconds: 1), curve: Curves.easeIn);
+                },
+                child: Icon(
+                  Icons.arrow_upward,
+                  color: Colors.white,
+                ),
+                backgroundColor: Colors.deepOrangeAccent,
+                shape: CircleBorder(),
+              )
+            : null,
         extendBody: true,
         extendBodyBehindAppBar: false,
         backgroundColor: Colors.white,
         body: NestedScrollView(
+          controller: controller,
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
               centerTitle: false,
